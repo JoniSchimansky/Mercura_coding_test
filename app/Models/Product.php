@@ -29,7 +29,7 @@ class Product extends Model
      */
     public function options()
     {
-        return $this->hasMany(Option::class);
+        return $this->belongsToMany(Option::class)->withPivot('price');
     }
 
     /**
@@ -41,4 +41,16 @@ class Product extends Model
     {
         return Product::all();
     }
+
+    /**
+     * Get a specific product with its options.
+     *
+     * @param  int  $productId
+     * @return \App\Models\Product
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
+     */
+    // public static function getProductWithOptions($productId)
+    // {
+    //     return Product::with('options')->findOrFail($productId);
+    // }
 }

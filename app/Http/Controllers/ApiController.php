@@ -38,7 +38,7 @@ class ApiController extends Controller
     public function showProduct($product_id)
     {
         // Get product with options
-        $product = Product::getProductWithOptions($product_id);
+        $product = Product::with('options')->findOrFail($product_id);
 
         return response()->json($product);
     }

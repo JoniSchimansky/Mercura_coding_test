@@ -28,6 +28,14 @@ class Option extends Model
     ];
 
     /**
+     * The options associated with the product.
+     */
+    public function products()
+    {
+        return $this->belongsToMany(Product::class)->withPivot('price');
+    }
+
+    /**
      * Get a specific option.
      *
      * @param  int  $optionId
