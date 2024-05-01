@@ -7,6 +7,10 @@ Before you begin, ensure you have met the following requirements:
 - Docker Desktop: [Download Docker](https://www.docker.com/products/docker-desktop)
 - Windows 10 Home/Pro/Enterprise with WSL 2 or macOS or Linux.
 
+## Links of interest
+- Docker installation documentation: [Docker installation using sail](https://laravel.com/docs/11.x/installation#docker-installation-using-sail)
+- Sail documentation: [Sail documentation](https://laravel.com/docs/11.x/sail)
+
 ### Setup Instructions
 
 To set up and run the project locally using Laravel Sail, follow these steps:
