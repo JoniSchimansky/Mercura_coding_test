@@ -35,6 +35,11 @@ class Option extends Model
         return $this->belongsToMany(Product::class)->withPivot('price');
     }
 
+    public function quotes()
+    {
+        return $this->belongsToMany(Quote::class)->withPivot('price');
+    }
+
     /**
      * Get a specific option.
      *

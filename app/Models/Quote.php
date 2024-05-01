@@ -30,7 +30,16 @@ class Quote extends Model
      */
     public function options()
     {
-        return $this->belongsToMany(Option::class)->withPivot('price');
+        return $this->belongsToMany(Option::class, 'option_product')->withPivot('price');
+    }
+
+
+    /**
+     * The options associated with the quote.
+     */
+    public function quoteOptions()
+    {
+        return $this->belongsToMany(Option::class, 'quote_options')->withPivot('price');
     }
 
     /**
@@ -41,46 +50,52 @@ class Quote extends Model
      * @throws \InvalidArgumentException
      * @throws \RuntimeException
      */
+
     public static function createQuote(array $requestData)
     {
         // Validate entry data
         $validator = Validator::make($requestData, [
             'user_name' => 'required|string',
             'user_email' => 'required|email',
-            'product_id' => 'required|exists:products,id',
-            'selected_options' => 'required|array',
-            'selected_options.*' => 'exists:options,id',
         ]);
-
-        // Validation errors
+    
         if ($validator->fails()) {
-            throw new \InvalidArgumentException($validator->errors()->first());
+            \Log::error('Validation failed:', $validator->errors()->first());
+            return response()->json(['error' => $validator->errors()->first()], 422);
         }
-
+    
         try {
-            // Calculate total price
-            $totalPrice = static::calculateTotalPrice($requestData['product_id'], $requestData['selected_options']);
+            $totalPrice = self::calculateTotalPrice($requestData['product_id'], $requestData['selected_options']);
 
-            // Create new quote on DB
-            $quote = static::create([
+            // Create new quote
+            $quote = self::create([
                 'user_name' => $requestData['user_name'],
                 'user_email' => $requestData['user_email'],
                 'total_price' => $totalPrice,
             ]);
-
+        
             // Get selected options
             $selectedOptionsDetails = Option::whereIn('id', $requestData['selected_options'])->get();
-
-            // Associate selected options with the quote and price
+        
+            // Associate selected options and prices
             foreach ($selectedOptionsDetails as $option) {
-                $quote->options()->attach($option, ['price' => $option->price]);
+                $quote->quoteOptions()->attach($option->id, ['price' => $option->price]);
             }
+        
+            \Log::info('Quote created successfully', ['quote' => $quote->toArray()]);
 
             return $quote;
+
+        } catch (\Illuminate\Database\QueryException $e) {
+            \Log::error('Error creating quote:', [$e->getMessage()]);
+
+            return response()->json(['error' => 'Database query error.', 'message' => $e->getMessage()], 500);
         } catch (\Exception $e) {
-            throw new \RuntimeException('An error occurred while creating the quote.');
+            \Log::error('Error creating quote:', $e->getMessage());
+            return response()->json(['error' => 'An error occurred while creating the quote.'], 500);
         }
     }
+    
 
     /**
      * Calculate the total price of the quote.
@@ -90,7 +105,7 @@ class Quote extends Model
      * @return float
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
-    private static function calculateTotalPrice($productId, $selectedOptions)
+    public static function calculateTotalPrice($productId, $selectedOptions)
     {
         // Get product base price
         $basePrice = Product::findOrFail($productId)->base_price;

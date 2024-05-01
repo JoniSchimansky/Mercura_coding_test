@@ -31,6 +31,14 @@ class Product extends Model
     {
         return $this->belongsToMany(Option::class)->withPivot('price');
     }
+    
+    /**
+     * The quotes associated with the product.
+     */
+    public function quotes()
+    {
+        return $this->hasMany(Quote::class);
+    }
 
     /**
      * Get all products with basic information.
@@ -41,16 +49,4 @@ class Product extends Model
     {
         return Product::all();
     }
-
-    /**
-     * Get a specific product with its options.
-     *
-     * @param  int  $productId
-     * @return \App\Models\Product
-     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
-     */
-    // public static function getProductWithOptions($productId)
-    // {
-    //     return Product::with('options')->findOrFail($productId);
-    // }
 }
